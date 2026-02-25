@@ -1,6 +1,6 @@
 # ClientServer Application
 
-A full-stack web application built with a **Client-Server Architecture** pattern, featuring a modern React frontend and a RESTful Express backend. This application serves as a learning management system with course management, media centers, file uploads, collaboration features, and analytics.
+A full-stack web application built with a **Client-Server Architecture** pattern, featuring a modern React frontend and a RESTful Express backend. This application serves as a media center management system that has the list of media centers, file uploads, collaboration features, and analytics.
 
 ## 🏗️ Architecture Style
 
