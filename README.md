@@ -2,6 +2,8 @@
 
 A full-stack web application built with a **Client-Server Architecture** pattern, featuring a modern React frontend and a RESTful Express backend. This application serves as a media center management system that has the list of media centers, file uploads, collaboration features, and analytics.
 
+🌐 **Live Demo**: [https://saaysalim.github.io/ClientServer/](https://saaysalim.github.io/ClientServer/)
+
 ## 🏗️ Architecture Style
 
 This application follows the **Client-Server Architecture** pattern, a foundational architectural style that separates concerns between the presentation layer (client) and the data/business logic layer (server).
@@ -349,6 +351,7 @@ This project is part of a Software Architecture course assignment.
 
 ## 🔗 Links
 
+- **Live Demo**: https://saaysalim.github.io/ClientServer/
 - **GitHub Repository**: https://github.com/saaysalim/ClientServer
 
 ## 📧 Contact
