@@ -350,7 +350,6 @@ This project is part of a Software Architecture course assignment.
 ## 🔗 Links
 
 - **GitHub Repository**: https://github.com/saaysalim/ClientServer
-- **Original Figma Design**: https://www.figma.com/design/NHlDWWAQCrwnG5iEb9mxrd/React-based-website
 
 ## 📧 Contact
 
