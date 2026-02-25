@@ -77,32 +77,27 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
    - Landing page with application overview
    - Quick navigation to all sections
 
-### 2. **Course Management**
-   - Browse available courses
-   - View course details (title, description, instructor)
-   - Create new courses (via API)
-
-### 3. **Media Centers**
+### 2. **Media Centers**
    - Manage media repositories
    - View media center information
    - Add new media centers
 
-### 4. **File Upload System**
+### 3. **File Upload System**
    - Upload functionality
    - Track uploaded files
    - Manage upload history
 
-### 5. **Collaboration Tools**
+### 4. **Collaboration Tools**
    - Collaborative workspace
    - Team collaboration features
 
-### 6. **Analytics Dashboard**
+### 5. **Analytics Dashboard**
    - Real-time statistics
    - User metrics
    - Course and media tracking
    - Page view analytics
 
-### 7. **Architecture Visualization**
+### 6. **Architecture Visualization**
    - Interactive architecture diagram
    - System overview
 
