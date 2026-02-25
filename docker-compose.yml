@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - CLIENT_URL=http://localhost:5173
+    volumes:
+      - ./server/src:/app/server/src
+    command: npm run dev
+    depends_on:
+      - client
+
+  client:
+    build:
+      context: .
+      dockerfile: client.Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    volumes:
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+    command: npm run dev
+
+volumes:
+  node_modules_server:
+  node_modules_client:
