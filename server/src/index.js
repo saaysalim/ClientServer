@@ -113,14 +113,261 @@ app.get('/api/collaborations', (req, res) => {
   res.json(dataStore.collaborations);
 });
 
-app.post('/api/collaborations', (req, res) => {
-  const newCollaboration = {
-    id: uuidv4(),
-    ...req.body,
-    createdAt: new Date().toISOString(),
-  };
-  dataStore.collaborations.push(newCollaboration);
-  res.status(201).json(newCollaboration);
+// Get collaboration by ID
+app.get('/api/collaborations/:id', (req, res) => {
+  const collaboration = dataStore.collaborations.find(c => c.id === req.params.id);
+  if (!collaboration) return res.status(404).json({ error: 'Collaboration not found' });
+  res.json(collaboration);
+});
+
+// Create new collaboration with blockchain
+app.post('/api/collaborations', async (req, res) => {
+  try {
+    const { title, description, deadline, members } = req.body;
+    
+    if (!title || !description) {
+      return res.status(400).json({ error: 'Missing title or description' });
+    }
+    
+    const collaborationId = `collab-${uuidv4()}`;
+    const deadlineTimestamp = deadline ? new Date(deadline).getTime() / 1000 : Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 days default
+    
+    const newCollaboration = {
+      id: collaborationId,
+      title,
+      description,
+      deadline: deadlineTimestamp,
+      members: members || [],
+      owner: req.body.owner || 'anonymous',
+      createdAt: new Date().toISOString(),
+      status: 'ACTIVE',
+      blockchainVerified: false,
+      blockchainHash: null,
+    };
+    
+    // Record collaboration on blockchain
+    if (blockchainService.getSignerAddress()) {
+      try {
+        const collaborationData = {
+          collaborationId,
+          title,
+          description,
+          deadline: deadlineTimestamp,
+          owner: newCollaboration.owner
+        };
+        
+        const blockchainResult = await blockchainService.recordDataIntegrity(
+          collaborationId,
+          blockchainService.generateDataHash(collaborationData),
+          { type: 'collaboration', members: members?.length || 0 }
+        );
+        
+        if (blockchainResult.success) {
+          newCollaboration.blockchainVerified = true;
+          newCollaboration.blockchainHash = blockchainResult.record.dataHash;
+          
+          // Create audit log
+          await blockchainService.createAuditLog(
+            'COLLABORATION_CREATED',
+            newCollaboration.owner,
+            'collaboration',
+            { collaborationId, title }
+          );
+        }
+      } catch (blockchainError) {
+        console.warn('Blockchain recording failed:', blockchainError.message);
+        // Continue even if blockchain fails
+      }
+    }
+    
+    dataStore.collaborations.push(newCollaboration);
+    res.status(201).json(newCollaboration);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add member to collaboration
+app.post('/api/collaborations/:id/members', async (req, res) => {
+  try {
+    const { memberId, memberName, role } = req.body;
+    const collaboration = dataStore.collaborations.find(c => c.id === req.params.id);
+    
+    if (!collaboration) {
+      return res.status(404).json({ error: 'Collaboration not found' });
+    }
+    
+    const newMember = {
+      id: uuidv4(),
+      memberId,
+      memberName,
+      role: role || 'contributor',
+      joinedAt: new Date().toISOString(),
+    };
+    
+    collaboration.members = collaboration.members || [];
+    collaboration.members.push(newMember);
+    
+    // Record on blockchain
+    if (blockchainService.getSignerAddress()) {
+      try {
+        await blockchainService.createAuditLog(
+          'MEMBER_ADDED',
+          collaboration.owner,
+          `collaboration/${req.params.id}`,
+          { memberId, memberName, role }
+        );
+      } catch (blockchainError) {
+        console.warn('Blockchain audit log failed:', blockchainError.message);
+      }
+    }
+    
+    res.status(201).json(newMember);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get collaboration members
+app.get('/api/collaborations/:id/members', (req, res) => {
+  const collaboration = dataStore.collaborations.find(c => c.id === req.params.id);
+  if (!collaboration) {
+    return res.status(404).json({ error: 'Collaboration not found' });
+  }
+  res.json(collaboration.members || []);
+});
+
+// Create collaboration agreement
+app.post('/api/collaborations/:id/agreement', async (req, res) => {
+  try {
+    const { agreementText } = req.body;
+    const collaboration = dataStore.collaborations.find(c => c.id === req.params.id);
+    
+    if (!collaboration) {
+      return res.status(404).json({ error: 'Collaboration not found' });
+    }
+    
+    if (!agreementText) {
+      return res.status(400).json({ error: 'Agreement text is required' });
+    }
+    
+    // Create agreement hash
+    const agreementHash = blockchainService.generateDataHash({
+      collaborationId: req.params.id,
+      agreementText,
+      createdAt: new Date().toISOString()
+    });
+    
+    const agreement = {
+      id: uuidv4(),
+      collaborationId: req.params.id,
+      text: agreementText,
+      hash: agreementHash,
+      createdAt: new Date().toISOString(),
+      signers: []
+    };
+    
+    collaboration.agreement = agreement;
+    
+    // Record agreement on blockchain
+    if (blockchainService.getSignerAddress()) {
+      try {
+        await blockchainService.recordDataIntegrity(
+          `agreement-${req.params.id}`,
+          agreementHash,
+          { type: 'collaboration_agreement', collaborationId: req.params.id }
+        );
+      } catch (blockchainError) {
+        console.warn('Blockchain agreement recording failed:', blockchainError.message);
+      }
+    }
+    
+    res.status(201).json(agreement);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Sign collaboration agreement
+app.post('/api/collaborations/:id/sign-agreement', async (req, res) => {
+  try {
+    const { signerId, signerName } = req.body;
+    const collaboration = dataStore.collaborations.find(c => c.id === req.params.id);
+    
+    if (!collaboration) {
+      return res.status(404).json({ error: 'Collaboration not found' });
+    }
+    
+    if (!collaboration.agreement) {
+      return res.status(400).json({ error: 'No agreement exists for this collaboration' });
+    }
+    
+    const signature = {
+      signerId,
+      signerName,
+      signedAt: new Date().toISOString(),
+      hash: blockchainService.generateDataHash({
+        collaborationId: req.params.id,
+        signerId,
+        signerName,
+        agreementHash: collaboration.agreement.hash
+      })
+    };
+    
+    collaboration.agreement.signers = collaboration.agreement.signers || [];
+    collaboration.agreement.signers.push(signature);
+    
+    // Record signature on blockchain
+    if (blockchainService.getSignerAddress()) {
+      try {
+        await blockchainService.createAuditLog(
+          'AGREEMENT_SIGNED',
+          signerId,
+          `collaboration/${req.params.id}`,
+          { signerName, agreementHash: collaboration.agreement.hash }
+        );
+      } catch (blockchainError) {
+        console.warn('Blockchain signature recording failed:', blockchainError.message);
+      }
+    }
+    
+    res.status(201).json(signature);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update collaboration status
+app.put('/api/collaborations/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const collaboration = dataStore.collaborations.find(c => c.id === req.params.id);
+    
+    if (!collaboration) {
+      return res.status(404).json({ error: 'Collaboration not found' });
+    }
+    
+    const oldStatus = collaboration.status;
+    collaboration.status = status;
+    
+    // Record status change on blockchain
+    if (blockchainService.getSignerAddress()) {
+      try {
+        await blockchainService.createAuditLog(
+          'STATUS_CHANGED',
+          collaboration.owner,
+          `collaboration/${req.params.id}`,
+          { oldStatus, newStatus: status }
+        );
+      } catch (blockchainError) {
+        console.warn('Blockchain status update failed:', blockchainError.message);
+      }
+    }
+    
+    res.json(collaboration);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Analytics
