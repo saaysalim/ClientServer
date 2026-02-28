@@ -57,6 +57,11 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
 - **State Management**: React Hooks
 - **HTTP Client**: Fetch API
 - **Icons**: Lucide React, Material Icons
+- **Blockchain**: 
+  - ethers.js for wallet and contract interaction
+  - web3.js as alternative
+  - MetaMask integration
+  - Cryptographic operations (crypto-js)
 
 ### Backend (Server)
 - **Runtime**: Node.js
@@ -67,11 +72,23 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
   - Static file serving
 - **Storage**: In-memory data store (development)
 - **UUID Generation**: uuid v9
+- **Blockchain**: 
+  - ethers.js for provider and signer management
+  - Solidity smart contracts
+  - Cryptographic hashing and signatures
+
+### Smart Contracts (Blockchain)
+- **Language**: Solidity 0.8+
+- **Access Control**: Role-based permissions
+- **Data Integrity**: Immutable audit trails
+- **Federated Network**: Node consensus and governance
+- **Certificate Validation**: Digital credentials
 
 ### DevOps
 - **Containerization**: Docker & Docker Compose
 - **Version Control**: Git
 - **Package Management**: npm
+- **Blockchain Networks**: Ethereum, Polygon, Test Networks
 
 ## ✨ Features
 
@@ -99,9 +116,41 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
    - Course and media tracking
    - Page view analytics
 
-### 6. **Architecture Visualization**
-   - Interactive architecture diagram
-   - System overview
+### 7. **Blockchain Security & Smart Contracts**
+   - Cryptographic data hashing and verification
+   - Digital credentials and certificates
+   - Access control management
+   - Immutable audit trails
+   - Federated network consensus
+   - Proof of ownership
+   - Smart contract-based governance
+
+## 🔗 Blockchain Integration
+
+This application includes comprehensive blockchain integration for enhanced security and decentralized trust. The blockchain layer provides:
+
+### Smart Contracts
+- **AccessControl.sol** - Role-based permission management
+- **DataIntegrity.sol** - Immutable audit trails and data verification
+- **FederatedNetwork.sol** - Decentralized network management with consensus
+- **CourseValidator.sol** - Digital certificate issuance and verification
+
+### Security Features
+- Cryptographic hashing (SHA-256) for data integrity
+- Digital signatures for authentication
+- Immutable transaction records
+- Role-based access control (RBAC)
+- Proof of ownership generation
+- Certificate revocation capability
+
+### Federated Network
+- Node registration and reputation system
+- Consensus-based governance
+- Distributed decision making
+- No single point of failure
+- Regional node distribution
+
+For detailed blockchain documentation, see [BLOCKCHAIN.md](./BLOCKCHAIN.md)
 
 ## 📋 Prerequisites
 
