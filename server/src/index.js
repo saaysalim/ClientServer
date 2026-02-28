@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import ServerBlockchainService from './blockchainService.js';
+import KafkaService from './kafkaService.js';
 
 dotenv.config();
 
@@ -16,6 +17,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Initialize Blockchain Service
 const blockchainService = new ServerBlockchainService();
 blockchainService.initializeProvider(process.env.BLOCKCHAIN_RPC_URL || 'http://localhost:8545');
+
+const kafkaBrokers = (process.env.KAFKA_BROKERS || 'localhost:9092')
+  .split(',')
+  .map(broker => broker.trim())
+  .filter(Boolean);
+const kafkaTopic = process.env.KAFKA_COLLAB_TOPIC || 'media-center-collaborations';
+const kafkaService = new KafkaService({
+  clientId: process.env.KAFKA_CLIENT_ID || 'clientserver-app',
+  brokers: kafkaBrokers,
+  topic: kafkaTopic,
+});
+kafkaService.initialize();
 
 // Initialize signer if private key provided
 if (process.env.BLOCKCHAIN_PRIVATE_KEY) {
@@ -54,8 +67,26 @@ const dataStore = {
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'Server is running', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'Server is running',
+    timestamp: new Date().toISOString(),
+    kafka: {
+      connected: kafkaService.isReady(),
+      topic: kafkaTopic,
+      brokers: kafkaBrokers,
+    },
+  });
 });
+
+const publishCollaborationEvent = async (eventType, payload) => {
+  const publishResult = await kafkaService.publishEvent(eventType, payload);
+
+  if (!publishResult.success && !publishResult.skipped) {
+    console.warn(`Kafka publish failed for ${eventType}:`, publishResult.error);
+  }
+
+  return publishResult;
+};
 
 // Courses
 app.get('/api/courses', (req, res) => {
@@ -179,6 +210,18 @@ app.post('/api/collaborations', async (req, res) => {
         // Continue even if blockchain fails
       }
     }
+
+    const kafkaResult = await publishCollaborationEvent('COLLABORATION_CREATED', {
+      collaborationId,
+      title,
+      description,
+      owner: newCollaboration.owner,
+      membersCount: (members || []).length,
+      deadline: deadlineTimestamp,
+      mediaCenters: (members || []),
+    });
+
+    newCollaboration.kafkaPublished = kafkaResult.success;
     
     dataStore.collaborations.push(newCollaboration);
     res.status(201).json(newCollaboration);
@@ -221,6 +264,14 @@ app.post('/api/collaborations/:id/members', async (req, res) => {
         console.warn('Blockchain audit log failed:', blockchainError.message);
       }
     }
+
+    await publishCollaborationEvent('COLLABORATION_MEMBER_ADDED', {
+      collaborationId: req.params.id,
+      memberId,
+      memberName,
+      role: newMember.role,
+      owner: collaboration.owner,
+    });
     
     res.status(201).json(newMember);
   } catch (error) {
@@ -281,6 +332,13 @@ app.post('/api/collaborations/:id/agreement', async (req, res) => {
         console.warn('Blockchain agreement recording failed:', blockchainError.message);
       }
     }
+
+    await publishCollaborationEvent('COLLABORATION_AGREEMENT_CREATED', {
+      collaborationId: req.params.id,
+      agreementId: agreement.id,
+      agreementHash,
+      owner: collaboration.owner,
+    });
     
     res.status(201).json(agreement);
   } catch (error) {
@@ -330,6 +388,13 @@ app.post('/api/collaborations/:id/sign-agreement', async (req, res) => {
         console.warn('Blockchain signature recording failed:', blockchainError.message);
       }
     }
+
+    await publishCollaborationEvent('COLLABORATION_AGREEMENT_SIGNED', {
+      collaborationId: req.params.id,
+      signerId,
+      signerName,
+      agreementHash: collaboration.agreement.hash,
+    });
     
     res.status(201).json(signature);
   } catch (error) {
@@ -363,6 +428,13 @@ app.put('/api/collaborations/:id/status', async (req, res) => {
         console.warn('Blockchain status update failed:', blockchainError.message);
       }
     }
+
+    await publishCollaborationEvent('COLLABORATION_STATUS_CHANGED', {
+      collaborationId: req.params.id,
+      oldStatus,
+      newStatus: status,
+      owner: collaboration.owner,
+    });
     
     res.json(collaboration);
   } catch (error) {
