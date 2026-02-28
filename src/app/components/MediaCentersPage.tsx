@@ -63,6 +63,15 @@ const mediaCenters = [
     users: 121,
     storage: '7.4 TB',
     region: 'Europe'
+  },
+  {
+    id: 8,
+    name: 'Ex-Press',
+    location: 'Cork, Ireland',
+    status: 'online',
+    users: 87,
+    storage: '4.9 TB',
+    region: 'Europe'
   }
 ];
 
