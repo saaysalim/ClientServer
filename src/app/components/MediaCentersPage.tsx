@@ -54,6 +54,15 @@ const mediaCenters = [
     users: 134,
     storage: '10.1 TB',
     region: 'Americas'
+  },
+  {
+    id: 7,
+    name: 'Berlin Media in Cooperation and Transition (MiCT)',
+    location: 'Berlin, Germany',
+    status: 'online',
+    users: 121,
+    storage: '7.4 TB',
+    region: 'Europe'
   }
 ];
 
