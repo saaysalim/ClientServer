@@ -21,9 +21,9 @@ export default function ArchitectureDiagram() {
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-8">
         <ArchitectureLayer
           title="Client Layer"
-          description="Web Browser"
+          description="Web Browser / SPA"
           color="bg-blue-100"
-          items={['React UI', 'User Interface', 'Media Upload']}
+          items={['React UI', 'Collaboration Form', 'Media Centers Dashboard']}
         />
         
         <div className="flex items-center justify-center">
@@ -32,9 +32,9 @@ export default function ArchitectureDiagram() {
         
         <ArchitectureLayer
           title="Presentation Layer"
-          description="API Gateway"
+          description="REST API Surface"
           color="bg-purple-100"
-          items={['REST APIs', 'Authentication', 'Response Formatting']}
+          items={['REST APIs', 'CORS + Validation', 'Response Formatting']}
         />
         
         <div className="flex items-center justify-center">
@@ -45,20 +45,31 @@ export default function ArchitectureDiagram() {
           title="Business Layer"
           description="Application Logic"
           color="bg-green-100"
-          items={['Media Processing', 'Collaboration Rules', 'Workflow Engine']}
+          items={['Collaboration Engine', 'Blockchain Hooks', 'Workflow Rules']}
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 max-w-3xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-4 max-w-6xl mx-auto">
         <div className="flex items-center justify-center">
           <ArrowLeftRight className="text-gray-400" size={32} />
         </div>
         
         <ArchitectureLayer
-          title="Integration Layer"
-          description="Service Integration"
+          title="Event Layer"
+          description="Kafka Broker"
           color="bg-yellow-100"
-          items={['External APIs', 'Cross-border Services', 'Media Streaming']}
+          items={['KafkaJS Producer', 'Topic: media-center-collaborations', 'Async Collaboration Events']}
+        />
+
+        <div className="flex items-center justify-center">
+          <ArrowLeftRight className="text-gray-400" size={32} />
+        </div>
+
+        <ArchitectureLayer
+          title="Trust Layer"
+          description="Smart Contracts"
+          color="bg-indigo-100"
+          items={['AccessControl', 'DataIntegrity', 'CollaborationManager']}
         />
         
         <div className="flex items-center justify-center">
@@ -72,7 +83,7 @@ export default function ArchitectureDiagram() {
             title="Data Layer"
             description="Database"
             color="bg-red-100"
-            items={['Media Storage', 'User Data', 'Collaboration Logs']}
+            items={['In-Memory Store', 'Upload Records', 'Collaboration State + Logs']}
           />
         </div>
       </div>

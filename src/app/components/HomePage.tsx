@@ -44,15 +44,27 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     },
     {
       layer: 'Business Logic',
-      components: ['Course Management', 'Media Processing', 'Collaboration Engine'],
+      components: ['Course Management', 'Media Processing', 'Collaboration + Agreements'],
       color: 'bg-green-100',
       textColor: 'text-green-900'
     },
     {
-      layer: 'Data Layer',
-      components: ['Database', 'File Storage', 'Cache'],
+      layer: 'Event Streaming',
+      components: ['Kafka Broker', 'Collaboration Events Topic', 'Asynchronous Coordination'],
+      color: 'bg-yellow-100',
+      textColor: 'text-yellow-900'
+    },
+    {
+      layer: 'Blockchain Trust',
+      components: ['Smart Contracts', 'Data Integrity', 'Immutable Audit Trails'],
       color: 'bg-orange-100',
       textColor: 'text-orange-900'
+    },
+    {
+      layer: 'Data Layer',
+      components: ['In-Memory Store', 'File Upload Records', 'Collaboration State'],
+      color: 'bg-red-100',
+      textColor: 'text-red-900'
     }
   ];
 
@@ -140,7 +152,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
           {/* Architecture Layers */}
           <h3 className="text-2xl text-center mb-6 text-[#0d3b66]">N-Tier Architecture Layers</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {architectureLayers.map((item, index) => (
               <div key={index} className={`${item.color} rounded-lg p-6 border-2 border-gray-300 shadow-md`}>
                 <div className={`${item.textColor} font-bold text-lg mb-3`}>

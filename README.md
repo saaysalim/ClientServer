@@ -11,30 +11,30 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
 ### Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT TIER                              │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │         React Application (Port 5173)                     │  │
-│  │  - UI Components (React + Material-UI + shadcn/ui)        │  │
-│  │  - State Management                                       │  │
-│  │  - Client-Side Routing                                    │  │
-│  │  - API Service Layer (Vite Dev Server)                    │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                            │
-                            │ HTTP/REST API
-                            │ JSON Data Exchange
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                        SERVER TIER                              │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │         Express.js Backend (Port 5000)                    │  │
-│  │  - RESTful API Endpoints                                  │  │
-│  │  - Business Logic Layer                                   │  │
-│  │  - CORS & Security Middleware                             │  │
-│  │  - In-Memory Data Store                                   │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                CLIENT TIER                                  │
+│  React + Vite (Port 5173)                                                   │
+│  - Media Centers UI, Collaboration Form, Analytics, Architecture Dashboard  │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      │ HTTP/REST + JSON
+                                      ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                SERVER TIER                                  │
+│  Express.js + Node.js (Port 5000)                                           │
+│  - Collaboration APIs, Blockchain endpoints, Kafka event publishing         │
+│  - In-memory collaboration/media state                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+                    │                                   │
+                    │ Async Events                      │ Trust + Audit
+                    ▼                                   ▼
+┌───────────────────────────────────────┐   ┌──────────────────────────────────┐
+│           EVENT STREAMING             │   │        BLOCKCHAIN LAYER          │
+│  Kafka Broker + Zookeeper             │   │  Solidity Smart Contracts         │
+│  Topic: media-center-collaborations   │   │  AccessControl, DataIntegrity,   │
+│  Collaboration lifecycle events        │   │  FederatedNetwork, CourseValidator│
+│                                       │   │  CollaborationManager             │
+└───────────────────────────────────────┘   └──────────────────────────────────┘
 ```
 
 ### Key Architectural Characteristics
@@ -44,6 +44,8 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
 - **Scalability**: Client and server can be scaled independently
 - **Technology Independence**: Frontend and backend use different technology stacks
 - **Multiple Clients Support**: Same API can serve web, mobile, or desktop clients
+- **Event-Driven Collaboration**: Kafka enables asynchronous collaboration signals between media centers
+- **Verifiable Trust Layer**: Smart contracts provide immutable integrity and audit logging
 
 ## 🚀 Technology Stack
 
@@ -72,6 +74,10 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
   - Static file serving
 - **Storage**: In-memory data store (development)
 - **UUID Generation**: uuid v9
+- **Event Streaming**:
+  - KafkaJS client
+  - Apache Kafka broker (Docker)
+  - Zookeeper coordination service
 - **Blockchain**: 
   - ethers.js for provider and signer management
   - Solidity smart contracts
@@ -83,6 +89,7 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
 - **Data Integrity**: Immutable audit trails
 - **Federated Network**: Node consensus and governance
 - **Certificate Validation**: Digital credentials
+- **Collaboration Governance**: Multi-member collaboration lifecycle and agreement signing
 
 ### DevOps
 - **Containerization**: Docker & Docker Compose
@@ -109,6 +116,9 @@ This application follows the **Client-Server Architecture** pattern, a foundatio
 ### 4. **Collaboration Tools**
    - Collaborative workspace
    - Team collaboration features
+  - Smart contract-ready collaboration lifecycle
+  - Agreement creation and member signing
+  - Kafka-backed event notifications between media centers
 
 ### 5. **Analytics Dashboard**
    - Real-time statistics
@@ -134,6 +144,24 @@ This application includes comprehensive blockchain integration for enhanced secu
 - **DataIntegrity.sol** - Immutable audit trails and data verification
 - **FederatedNetwork.sol** - Decentralized network management with consensus
 - **CourseValidator.sol** - Digital certificate issuance and verification
+- **CollaborationManager.sol** - On-chain collaboration and agreement workflow
+
+## 📡 Event Streaming (Kafka)
+
+Collaboration events are published to Kafka to support asynchronous coordination between distributed media centers.
+
+### Kafka Components
+- **Kafka Broker** (`kafka`) for message distribution
+- **Zookeeper** (`zookeeper`) for broker coordination
+- **KafkaJS Producer/Consumer** in backend (`server/src/kafkaService.js`)
+- **Topic**: `media-center-collaborations`
+
+### Collaboration Events Published
+- `COLLABORATION_CREATED`
+- `COLLABORATION_MEMBER_ADDED`
+- `COLLABORATION_AGREEMENT_CREATED`
+- `COLLABORATION_AGREEMENT_SIGNED`
+- `COLLABORATION_STATUS_CHANGED`
 
 ### Security Features
 - Cryptographic hashing (SHA-256) for data integrity
@@ -249,8 +277,17 @@ ClientServer/
 │
 ├── server/                       # Backend source code
 │   ├── src/
-│   │   └── index.js              # Express server
+│   │   ├── index.js              # Express server
+│   │   ├── blockchainService.js  # Backend blockchain integration
+│   │   └── kafkaService.js       # Kafka producer/consumer service
 │   └── package.json              # Server dependencies
+│
+├── contracts/                    # Solidity smart contracts
+│   ├── AccessControl.sol
+│   ├── DataIntegrity.sol
+│   ├── FederatedNetwork.sol
+│   ├── CourseValidator.sol
+│   └── CollaborationManager.sol
 │
 ├── guidelines/                   # Project guidelines
 ├── docker-compose.yml            # Docker Compose configuration
