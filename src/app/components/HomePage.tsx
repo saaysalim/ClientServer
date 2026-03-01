@@ -150,24 +150,98 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </div>
           </div>
 
-          {/* Architecture Layers */}
-          <h3 className="text-2xl text-center mb-6 text-[#0d3b66]">N-Tier Architecture Layers</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {/* Architecture Layers - Professional Flow Diagram */}
+          <h3 className="text-2xl text-center mb-8 text-[#0d3b66]">N-Tier Architecture Flow</h3>
+          <div className="max-w-4xl mx-auto">
             {architectureLayers.map((item, index) => (
-              <div key={index} className={`${item.color} rounded-lg p-6 border-2 border-gray-300 shadow-md`}>
-                <div className={`${item.textColor} font-bold text-lg mb-3`}>
-                  {index + 1}. {item.layer}
+              <div key={index} className="mb-6">
+                {/* Layer Card */}
+                <div className={`${item.color} rounded-xl p-6 border-3 border-gray-400 shadow-xl hover:shadow-2xl transition-all transform hover:scale-[1.02]`}>
+                  <div className="flex items-start gap-4">
+                    {/* Layer Number Badge */}
+                    <div className={`${item.textColor} bg-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl shadow-md flex-shrink-0`}>
+                      {index + 1}
+                    </div>
+                    
+                    {/* Layer Content */}
+                    <div className="flex-1">
+                      <div className={`${item.textColor} font-bold text-2xl mb-3`}>
+                        {item.layer}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        {item.components.map((comp, i) => (
+                          <div key={i} className="bg-white bg-opacity-70 rounded-lg px-3 py-2 text-sm text-gray-800 font-medium shadow-sm">
+                            <span className="mr-2 text-gray-500">•</span>
+                            {comp}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  {item.components.map((comp, i) => (
-                    <li key={i} className="flex items-center">
-                      <span className="mr-2">▪</span>
-                      {comp}
-                    </li>
-                  ))}
-                </ul>
+
+                {/* Connection Arrow - Show relationships */}
+                {index < architectureLayers.length - 1 && (
+                  <div className="flex flex-col items-center py-3">
+                    <div className="text-gray-400 text-4xl leading-none">↓</div>
+                    <div className="text-xs text-gray-600 font-semibold mt-1 bg-white px-3 py-1 rounded-full shadow-sm">
+                      {index === 0 && "Calls"}
+                      {index === 1 && "Processes"}
+                      {index === 2 && "Publishes / Verifies"}
+                      {index === 3 && "Async Events"}
+                      {index === 4 && "Stores & Audits"}
+                    </div>
+                  </div>
+                )}
+
+                {/* Parallel Processing Indicator for Event and Blockchain layers */}
+                {index === 2 && (
+                  <div className="flex items-center justify-center my-4">
+                    <div className="text-gray-400 text-2xl">┌─────────┴─────────┐</div>
+                  </div>
+                )}
+                {(index === 3 || index === 4) && index < architectureLayers.length - 1 && (
+                  <div className="flex items-center justify-center">
+                    <div className="text-gray-400 text-2xl">└─────────┬─────────┘</div>
+                  </div>
+                )}
               </div>
             ))}
+
+            {/* Key Relationships Legend */}
+            <div className="mt-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-300">
+              <h4 className="text-lg font-bold text-[#0d3b66] mb-4 text-center">Layer Relationships</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-blue-600 font-bold">↓</span>
+                  <div>
+                    <span className="font-semibold">Synchronous Flow:</span>
+                    <span className="text-gray-700"> Client → API → Business Logic</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-yellow-600 font-bold">⚡</span>
+                  <div>
+                    <span className="font-semibold">Event Streaming:</span>
+                    <span className="text-gray-700"> Kafka broadcasts collaboration events</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-orange-600 font-bold">🔒</span>
+                  <div>
+                    <span className="font-semibold">Blockchain Trust:</span>
+                    <span className="text-gray-700"> Smart contracts verify & audit</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">💾</span>
+                  <div>
+                    <span className="font-semibold">Data Persistence:</span>
+                    <span className="text-gray-700"> In-memory store with collaboration state</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
