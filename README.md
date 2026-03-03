@@ -6,40 +6,42 @@ A full-stack web application built with a **Client-Server Architecture** pattern
 
 ## 🏗️ Architecture Style
 
-This application follows the **Client-Server Architecture** pattern, a foundational architectural style that separates concerns between the presentation layer (client) and the data/business logic layer (server).
+This application follows a **Client-Server + MVC-inspired architecture** where the frontend acts as the **View**, Express routes act as the **Controller**, and backend services/data/blockchain/event integrations act as the **Model**.
 
 ### Architecture Overview
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                                CLIENT TIER                                  │
-│  React + Vite (Port 5173)                                                   │
-│  - Media Centers UI, Collaboration Form, Analytics, Architecture Dashboard  │
-└──────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      │ HTTP/REST + JSON
-                                      ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                                SERVER TIER                                  │
-│  Express.js + Node.js (Port 5000)                                           │
-│  - Collaboration APIs, Blockchain endpoints, Kafka event publishing         │
-│  - In-memory collaboration/media state                                      │
-└──────────────────────────────────────────────────────────────────────────────┘
-                    │                                   │
-                    │ Async Events                      │ Trust + Audit
-                    ▼                                   ▼
-┌───────────────────────────────────────┐   ┌──────────────────────────────────┐
-│           EVENT STREAMING             │   │        BLOCKCHAIN LAYER          │
-│  Kafka Broker + Zookeeper             │   │  Solidity Smart Contracts         │
-│  Topic: media-center-collaborations   │   │  AccessControl, DataIntegrity,   │
-│  Collaboration lifecycle events        │   │  FederatedNetwork, CourseValidator│
-│                                       │   │  CollaborationManager             │
-└───────────────────────────────────────┘   └──────────────────────────────────┘
+┌───────────────────────────────┐        Request/Response        ┌───────────────────────────────┐
+│             VIEW              │  <───────────────────────────> │          CONTROLLER           │
+│ React + Vite frontend         │                                │ Express API routes            │
+│ - Media centers dashboard     │                                │ - request flow orchestration  │
+│ - Collaboration UI            │                                │ - input validation            │
+│ - Analytics & architecture UI │                                │ - response shaping            │
+└───────────────────────────────┘                                └───────────────────────────────┘
+                                                  │
+                                                  │ Fetch/Execute business logic
+                                                  ▼
+                                        ┌───────────────────────────────┐
+                                        │             MODEL             │
+                                        │ Backend domain logic/services │
+                                        │ - collaboration rules         │
+                                        │ - in-memory media/data store  │
+                                        │ - blockchain integrity/audit  │
+                                        │ - Kafka event publishing      │
+                                        └───────────────────────────────┘
+                                          │                       │
+                                          │ Async events          │ Trust + audit
+                                          ▼                       ▼
+                               ┌─────────────────────────┐   ┌─────────────────────────┐
+                               │      Kafka Broker       │   │  Smart Contracts Layer  │
+                               │ media-center-collabs    │   │ Access/Data/Collab Mgr  │
+                               └─────────────────────────┘   └─────────────────────────┘
 ```
 
 ### Key Architectural Characteristics
 
-- **Separation of Concerns**: Frontend and backend are completely decoupled
+- **MVC Responsibility Split**: View handles presentation, Controller handles flow, Model handles business/data rules
+- **Separation of Concerns**: Frontend and backend are cleanly decoupled
 - **Stateless Communication**: RESTful API design with stateless HTTP requests
 - **Scalability**: Client and server can be scaled independently
 - **Technology Independence**: Frontend and backend use different technology stacks
